@@ -1,0 +1,6 @@
+apiVersion: mysql.sample.com/v1alpha1
+kind: MySQL
+metadata:
+  name: mysql-sample
+spec:
+  replicas: 3

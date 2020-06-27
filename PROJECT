@@ -1,3 +1,7 @@
 domain: sample.com
 repo: sample-mysql-operator
+resources:
+- group: mysql
+  kind: MySQL
+  version: v1alpha1
 version: "2"
