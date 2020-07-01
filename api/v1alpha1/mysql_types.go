@@ -17,23 +17,28 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/woohhan/kubebuilder-util/pkg/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // MySQLSpec defines the desired state of MySQL
 type MySQLSpec struct {
 	// Replicas 는 MySQL의 복제 개수를 나타낸다
+	// +kubebuilder:validation:Maximum=5
+	// +kubebuilder:validation:Minimum=1
 	Replicas int32 `json:"replicas"`
 }
 
 // MySQLStatus defines the observed state of MySQL
 type MySQLStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Conditions represent the latest available observations of an object's state
+	Conditions condition.Conditions `json:"conditions"`
 }
+
+const (
+	// ConditionTypeRunning 은 MySQL이 동작하고 있는지를 나타낸다
+	ConditionTypeRunning condition.ConditionType = "Running"
+)
 
 // +kubebuilder:object:root=true
 

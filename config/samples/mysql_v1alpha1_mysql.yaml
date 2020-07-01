@@ -3,4 +3,4 @@ kind: MySQL
 metadata:
   name: mysql-sample
 spec:
-  replicas: 3
+  replicas: 0

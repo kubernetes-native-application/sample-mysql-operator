@@ -1,0 +1,86 @@
+#!/bin/bash
+
+function print_help() {
+    echo " $0 [command]
+Test Toolbox
+
+Available Commands:
+  minikube [command]        download, start, clean
+  rl                        run on local
+  rk                        run on kubernetes
+  da                        delete all resources
+  acr                       delete cr
+  dcr                       apply cr
+  t     test with simple client
+" >&2
+}
+
+function wait_condition {
+  cond=$1
+  timeout=$2
+
+  for ((i=0; i<timeout; i+=5)) do
+    echo "Waiting for ${i}s condition: \"$cond\""
+    if eval $cond > /dev/null 2>&1; then echo "Conditon met"; return 0; fi;
+    sleep 5
+    kubectl get pods -A
+  done
+
+  echo "Condition timeout"
+  return 1
+}
+
+function minikube_command() {
+  case "${1:-}" in
+  download)
+    curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    chmod +x minikube
+    sudo mkdir -p /usr/local/bin/
+    sudo install minikube /usr/local/bin/
+    sudo snap install kubectl --classic
+  ;;
+  start)
+    CHANGE_MINIKUBE_NONE_USER=true sudo -E minikube start --driver=none --kubernetes-version=v1.17.3
+    sleep 3
+  ;;
+  clean)
+    CHANGE_MINIKUBE_NONE_USER=true sudo -E minikube delete
+  ;;
+  *)
+    print_help
+  ;;
+  esac
+}
+
+IMG=quay.io/sample-mysql-operator/sample-mysql-operator:canary
+
+case "${1:-}" in
+minikube)
+  minikube_command $2
+  ;;
+rl)
+  make && make install && make run ENABLE_WEBHOOKS=false
+  ;;
+rk)
+  make && make install && make docker-build && make docker-push && make deploy
+  ;;
+da)
+  (make undeploy || true) && (make uninstall || true)
+  ;;
+acr)
+  kubectl apply -f config/samples/mysql_v1alpha1_mysql.yaml
+  ;;
+dcr)
+  kubectl delete -f config/samples/mysql_v1alpha1_mysql.yaml
+  ;;
+gcr)
+  kubectl get mysqls.v1alpha1.mysql.sample.com -o json
+  ;;
+t)
+  kubectl run mysql-client --image=mysql:5.7 -i --rm --restart=Never -- mysql -h mysql-sample-0.mysql-sample -e "CREATE DATABASE test; CREATE TABLE test.messages (message VARCHAR(250)); INSERT INTO test.messages VALUES ('hello');"
+  kubectl run mysql-client-loop --image=mysql:5.7 -i -t --rm --restart=Never -- bash -ic "while sleep 1; do mysql -h mysql-sample-read -e 'SELECT @@server_id,NOW()'; done"
+  ;;
+*)
+  print_help
+;;
+esac

@@ -18,18 +18,19 @@ package controllers
 
 import (
 	"context"
+
+	"github.com/go-logr/logr"
+	"github.com/woohhan/kubebuilder-util/pkg/condition"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	mysqlv1alpha1 "sample-mysql-operator/api/v1alpha1"
 )
@@ -169,7 +170,41 @@ func (r *MySQLReconciler) syncStatefulSet(mysql *mysqlv1alpha1.MySQL) error {
 		}
 		return nil
 	}
-	return nil
+	return r.updateRunningCondition(sf, mysql)
+}
+
+func (r *MySQLReconciler) updateRunningCondition(sf *appsv1.StatefulSet, mysql *mysqlv1alpha1.MySQL) error {
+	isRunning := sf.Status.ReadyReplicas == mysql.Spec.Replicas
+	// 변경할 필요가 없는 경우 바로 리턴
+	if isRunning && mysql.Status.Conditions.IsTrueFor(mysqlv1alpha1.ConditionTypeRunning) {
+		return nil
+	}
+	if !isRunning && mysql.Status.Conditions.IsFalseFor(mysqlv1alpha1.ConditionTypeRunning) {
+		return nil
+	}
+	r.Log.Info("Update running condition", "condition", isRunning)
+	mysql.Status.Conditions.SetCondition(getRunningCondition(isRunning))
+	return r.Update(context.TODO(), mysql)
+}
+
+func getRunningCondition(isRunning bool) condition.Condition {
+	var cond condition.Condition
+	if isRunning {
+		cond = condition.Condition{
+			Type:    mysqlv1alpha1.ConditionTypeRunning,
+			Status:  corev1.ConditionTrue,
+			Reason:  "MysqlRunning",
+			Message: "MySQL is running",
+		}
+	} else {
+		cond = condition.Condition{
+			Type:    mysqlv1alpha1.ConditionTypeRunning,
+			Status:  corev1.ConditionFalse,
+			Reason:  "MysqlNotRunning",
+			Message: "StatefulSet is not ready yet",
+		}
+	}
+	return cond
 }
 
 func createStatefulSet(r *MySQLReconciler, mysql *mysqlv1alpha1.MySQL) error {
