@@ -184,7 +184,7 @@ func (r *MySQLReconciler) updateRunningCondition(sf *appsv1.StatefulSet, mysql *
 	}
 	r.Log.Info("Update running condition", "condition", isRunning)
 	mysql.Status.Conditions.SetCondition(getRunningCondition(isRunning))
-	return r.Update(context.TODO(), mysql)
+	return r.Status().Update(context.TODO(), mysql)
 }
 
 func getRunningCondition(isRunning bool) condition.Condition {

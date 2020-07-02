@@ -27,6 +27,8 @@ type MySQLSpec struct {
 	// +kubebuilder:validation:Maximum=5
 	// +kubebuilder:validation:Minimum=1
 	Replicas int32 `json:"replicas"`
+	// OwnerName 은 이 MySQL의 주인을 나타낸다. 반드시 [first name] [last name] 형태로 입력되어야 한다.
+	OwnerName string `json:"ownerName,omitempty"`
 }
 
 // MySQLStatus defines the observed state of MySQL
@@ -41,6 +43,7 @@ const (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // MySQL is the Schema for the mysqls API
 type MySQL struct {
