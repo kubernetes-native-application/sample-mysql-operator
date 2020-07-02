@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	mysqlv1alpha1 "sample-mysql-operator/api/v1alpha1"
+	mysqlv1alpha2 "sample-mysql-operator/api/v1alpha2"
 	"sample-mysql-operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
@@ -40,6 +41,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	_ = mysqlv1alpha1.AddToScheme(scheme)
+	_ = mysqlv1alpha2.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -76,7 +78,7 @@ func main() {
 	}
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = (&mysqlv1alpha1.MySQL{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "MySQL")
+			setupLog.Error(err, "unable to create webhook for v1alpha1", "webhook", "MySQL")
 			os.Exit(1)
 		}
 	}

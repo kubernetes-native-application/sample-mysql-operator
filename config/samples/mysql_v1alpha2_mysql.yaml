@@ -1,0 +1,8 @@
+apiVersion: mysql.sample.com/v1alpha2
+kind: MySQL
+metadata:
+  name: mysql-sample
+spec:
+  replicas: 2
+  ownerFirstName: woohyung
+  ownerLastName: han

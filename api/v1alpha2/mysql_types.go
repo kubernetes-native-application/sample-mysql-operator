@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1alpha2
 
 import (
 	"github.com/woohhan/kubebuilder-util/pkg/condition"
@@ -26,9 +26,9 @@ type MySQLSpec struct {
 	// Replicas 는 MySQL의 복제 개수를 나타낸다
 	// +kubebuilder:validation:Maximum=5
 	// +kubebuilder:validation:Minimum=1
-	Replicas int32 `json:"replicas"`
-	// OwnerName 은 이 MySQL의 주인을 나타낸다. 반드시 [first name] [last name] 형태로 입력되어야 한다.
-	OwnerName string `json:"ownerName,omitempty"`
+	Replicas       int32  `json:"replicas"`
+	OwnerFirstName string `json:"ownerFirstName"`
+	OwnerLastName  string `json:"ownerLastName"`
 }
 
 // MySQLStatus defines the observed state of MySQL
@@ -37,14 +37,8 @@ type MySQLStatus struct {
 	Conditions condition.Conditions `json:"conditions,omitempty"`
 }
 
-const (
-	// ConditionTypeRunning 은 MySQL이 동작하고 있는지를 나타낸다
-	ConditionTypeRunning condition.ConditionType = "Running"
-)
-
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:storageversion
 
 // MySQL is the Schema for the mysqls API
 type MySQL struct {

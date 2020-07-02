@@ -4,4 +4,7 @@ resources:
 - group: mysql
   kind: MySQL
   version: v1alpha1
+- group: mysql
+  kind: MySQL
+  version: v1alpha2
 version: "2"

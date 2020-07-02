@@ -19,4 +19,5 @@ kind: MySQL
 metadata:
   name: mysql-sample
 spec:
-  replicas: 3
+  replicas: 2
+  ownerName: woohyung han
