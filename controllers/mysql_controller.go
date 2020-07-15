@@ -55,6 +55,9 @@ func (r *MySQLReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	if err := r.finalize(mysql); err != nil {
+		return ctrl.Result{}, err
+	}
 	if err := r.syncReadService(mysql); err != nil {
 		return ctrl.Result{}, err
 	}
