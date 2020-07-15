@@ -29,6 +29,7 @@ import (
 // log is for logging in this package.
 var mysqllog = logf.Log.WithName("mysql-resource")
 
+// SetupWebhookWithManager setup new webhook
 func (r *MySQL) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).

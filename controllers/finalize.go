@@ -6,26 +6,27 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-const MYSQL_FINALIZER = "finalizer.sample-mysql-operator.com"
+// MysqlFinalizer is string for mysql finalizer
+const MysqlFinalizer = "finalizer.sample-mysql-operator.com"
 
 func (r *MySQLReconciler) finalize(mysql *mysqlv1alpha1.MySQL) error {
 	// MySQL이 삭제되었는지 확인
 	isMysqlMarkedToBeDeleted := mysql.GetDeletionTimestamp() != nil
 	if isMysqlMarkedToBeDeleted {
 		// 파이널라이저가 남아있는 경우
-		if contains(mysql.GetFinalizers(), MYSQL_FINALIZER) {
+		if contains(mysql.GetFinalizers(), MysqlFinalizer) {
 			// 클린업 로직 수행
 			if err := cleanUp(r, mysql); err != nil {
 				return err
 			}
 			// 파이널라이저를 제거
-			controllerutil.RemoveFinalizer(mysql, MYSQL_FINALIZER)
+			controllerutil.RemoveFinalizer(mysql, MysqlFinalizer)
 			return r.Update(context.TODO(), mysql)
 		}
 	}
 	// 파이널라이저가 없는 경우 추가
-	if !contains(mysql.GetFinalizers(), MYSQL_FINALIZER) {
-		controllerutil.AddFinalizer(mysql, MYSQL_FINALIZER)
+	if !contains(mysql.GetFinalizers(), MysqlFinalizer) {
+		controllerutil.AddFinalizer(mysql, MysqlFinalizer)
 		return r.Update(context.TODO(), mysql)
 	}
 	return nil
@@ -42,6 +43,6 @@ func contains(list []string, s string) bool {
 
 func cleanUp(r *MySQLReconciler, mysql *mysqlv1alpha1.MySQL) error {
 	// 추후 MySQL을 제거할 때 필요한 로직이 있으면 여기에 추가한다
-	r.Log.Info("Successfully clean up")
+	r.Log.Info("Successfully clean up", "mysql", mysql)
 	return nil
 }

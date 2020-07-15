@@ -13,10 +13,6 @@ endif
 
 all: manager
 
-# Run tests
-test: generate fmt vet manifests
-	go test ./... -coverprofile cover.out
-
 # Build manager binary
 manager: generate fmt vet
 	go build -o bin/manager main.go
@@ -60,7 +56,7 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 # Build the docker image
-docker-build: test
+docker-build:
 	docker build . -t ${IMG}
 
 # Push the docker image
@@ -83,3 +79,15 @@ CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
+
+# Run lint tests
+lint: generate fmt vet manifests
+	golangci-lint run ./... -v
+
+# Run unit tests
+unit: generate fmt vet manifests
+	 ginkgo -v controllers
+
+# Run e2e tests
+e2e: generate fmt vet manifests
+	ginkgo -v e2e
