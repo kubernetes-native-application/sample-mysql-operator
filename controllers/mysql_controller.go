@@ -47,6 +47,7 @@ type MySQLReconciler struct {
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;patch;delete
 
+// Reconcile is reconcile loop for MySQL
 func (r *MySQLReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	r.Log = r.Log.WithValues("mysql", req.NamespacedName)
 
@@ -384,6 +385,7 @@ func createStatefulSet(r *MySQLReconciler, mysql *mysqlv1alpha1.MySQL) error {
 	return nil
 }
 
+// SetupWithManager setup new manager for mysql
 func (r *MySQLReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mysqlv1alpha1.MySQL{}).

@@ -1,0 +1,48 @@
+name: sample-mysql-operator
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+  pull_request:
+jobs:
+  unit_test:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt-get -qq -y install golang-ginkgo-dev && make unit
+  lint:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.26
+  e2e_test:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          sudo apt-get -qq -y install conntrack golang-ginkgo-dev
+          curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          chmod +x minikube
+          sudo mkdir -p /usr/local/bin/
+          sudo install minikube /usr/local/bin/
+          sudo snap install kubectl --classic
+          CHANGE_MINIKUBE_NONE_USER=true sudo -E minikube start --driver=none --kubernetes-version=v1.18.5
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v2
+      - run: make e2e
+  deploy-latest:
+    if: github.ref == 'refs/heads/master'
+    needs: [unit_test, lint, e2e_test]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: build and push
+        env:
+          IMG: "quay.io/sample-mysql-operator/sample-mysql-operator:latest"
+        run: |
+          docker login -u=sample-mysql-operator+robot -p=${{ secrets.QUAY_PASSWORD }} quay.io
+          make && make docker-build && make docker-push
