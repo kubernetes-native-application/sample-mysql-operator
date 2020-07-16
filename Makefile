@@ -85,9 +85,9 @@ lint: generate fmt vet manifests
 	golangci-lint run ./... -v
 
 # Run unit tests
-unit: generate fmt vet manifests
+unit:
 	 ginkgo -v controllers
 
 # Run e2e tests
-e2e: generate fmt vet manifests
+e2e:
 	ginkgo -v e2e
