@@ -17,6 +17,9 @@ limitations under the License.
 package e2e
 
 import (
+	"fmt"
+	"github.com/onsi/ginkgo/config"
+	"github.com/onsi/ginkgo/reporters"
 	"path/filepath"
 	mysqlv1alpha2 "sample-mysql-operator/api/v1alpha2"
 	"sample-mysql-operator/controllers"
@@ -47,9 +50,8 @@ var testEnv *envtest.Environment
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"e2e test Suite",
-		[]Reporter{printer.NewlineReporter{}})
+	junitReporter := reporters.NewJUnitReporter(fmt.Sprintf("../e2e-ginkgo-junit_%d.xml", config.GinkgoConfig.ParallelNode))
+	RunSpecsWithDefaultAndCustomReporters(t, "Controller Suite", []Reporter{printer.NewlineReporter{}, junitReporter})
 }
 
 var _ = BeforeSuite(func(done Done) {
