@@ -1,3 +1,4 @@
+.PHONY: e2e
 
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
