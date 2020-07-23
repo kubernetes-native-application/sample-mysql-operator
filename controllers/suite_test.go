@@ -16,7 +16,7 @@ var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
 })
 
-func TestVirtualMachineImage(t *testing.T) {
+func TestMySqlReconcile(t *testing.T) {
 	RegisterFailHandler(Fail)
 	junitReporter := reporters.NewJUnitReporter(fmt.Sprintf("../unit-ginkgo-junit_%d.xml", config.GinkgoConfig.ParallelNode))
 	RunSpecsWithDefaultAndCustomReporters(t, "Controller Suite", []Reporter{printer.NewlineReporter{}, junitReporter})
